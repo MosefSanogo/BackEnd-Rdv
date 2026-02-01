@@ -208,5 +208,3 @@ Master Informatique – Université du Havre
 Projet de système de prise de rendez-vous en ligne
 
 
-
-Dis-moi 👍

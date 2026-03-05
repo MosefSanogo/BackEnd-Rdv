@@ -62,6 +62,28 @@ const generateTimeSlotsIfNotExist = async (date, serviceId, sousServiceId) => {
 
 }
 
+const isPeakHour = (slot) => {
+  const percentageUsed =
+    ((slot.capacity - slot.available) /
+      slot.capacity) * 100;
+
+  return percentageUsed >= 80;
+};
+
+const getTimeSlots = async (serviceId, sousServiceId, date) => {
+    const {timeslots, count} = await timeSlotModel.findByServiceAndSousServiceAndDate(serviceId, sousServiceId, date);   
+    const formattedSlots = timeslots.map(slot => ({
+        time: slot.time,
+        available: parseInt(slot.available),
+        capacity: parseInt(slot.capacity),
+        percentage: slot.capacity > 0 ? Math.round(((slot.capacity-slot.available) / slot.capacity) * 100) : 0,
+        isPeakHour: isPeakHour(slot),
+        isCompleted: slot.available === 0
+    }));
+    return {slots: formattedSlots, count};
+}
+
 export default{
-    generateTimeSlotsIfNotExist
+    generateTimeSlotsIfNotExist,
+    getTimeSlots
 }

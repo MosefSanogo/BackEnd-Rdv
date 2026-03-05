@@ -61,6 +61,15 @@ const create = async (data, image) => {
   }
 };
 
+const createSousService = async (data) => {
+    const [result] = await database.query(
+        `INSERT INTO sous_service (service_id, nom)
+         VALUES ? `,
+        [data]
+    );
+    return { message: "Sous service ajouté avec succès" };
+}
+
 const findByNameCityAndAddress  = async (nom,id,adresse)=>{
     const [result] = await database.execute(
         'SELECT * FROM services WHERE nom = ? AND ville_id = ? AND adresse = ?',
@@ -116,11 +125,106 @@ const setSousServiceActif = async (actif,serviceId)=>{
     return result
 }
 
+const getSousServiceActif = async (serviceId)=>{
+    const [result] = await database.execute(
+        `SELECT * FROM sous_service WHERE service_id = ? AND actif = 1`,
+        [serviceId]
+    );
+
+    return result;
+}
+
+const getCountSousServiceActif = async (serviceId)=>{
+    const [result] = await database.execute(
+        `SELECT COUNT(*) as count FROM sous_service WHERE service_id = ? AND actif = 1`,
+        [serviceId]
+    );
+
+    return result[0];
+}
+
+const getSousServiceWithParams = async (serviceId) => {
+  const query = `SELECT
+      ss.id,
+      ss.nom AS name,
+      v.nom AS localisation,
+      s.category AS category,
+      (
+        SELECT COALESCE(SUM(h.capacity_heure), 0)
+        FROM horaires_travail h
+        WHERE h.sous_service_id = ss.id
+      ) AS capacity,
+      (
+        SELECT COUNT(r.id)
+        FROM reservation r
+        WHERE r.sous_service_id = ss.id
+          AND r.date >= CURDATE()
+          AND r.date < CURDATE() + INTERVAL 1 DAY
+      ) AS appointmentsToday,
+
+      CASE
+        WHEN ss.actif = 1 THEN 'active'
+        ELSE 'inactive'
+      END AS status
+
+    FROM sous_service ss
+    INNER JOIN services s ON s.id = ss.service_id
+    INNER JOIN villes v ON v.id = s.ville_id
+    WHERE ss.service_id = ?`;
+    
+  
+
+  const [rows] = await database.execute(query, [serviceId]);
+
+  return rows.map(row => ({
+    id: String(row.id),
+    name: row.name,
+    localisation: row.localisation,
+    category: row.category,
+    status: row.status,
+    capacity: Number(row.capacity),
+    appointmentsToday: Number(row.appointmentsToday),
+  }));
+};
+
+const deleteSousService = async (id) => {
+  const connection = await database.getConnection();
+
+  try {
+    await connection.beginTransaction();
+   const [result] = await connection.execute(
+      `DELETE FROM sous_service WHERE id = ?`,
+      [id]
+    );
+    await connection.execute(
+      `DELETE FROM horaires_travail WHERE sous_service_id = ?`,
+      [id]
+    );
+    await connection.execute(
+      `DELETE FROM time_slots WHERE sous_service_id = ?`,
+      [id]
+    );
+    await connection.commit();
+    return result;
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
+};
+
+
 export default{
     create,
     findByNameCityAndAddress,
     findAllService,
     findAllSousServiceFromServiceId,
     setServiceActif,
-    setSousServiceActif 
+    setSousServiceActif,
+    getSousServiceActif,
+    getCountSousServiceActif,
+    getSousServiceWithParams,
+    createSousService,
+    deleteSousService
 }

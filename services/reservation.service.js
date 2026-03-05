@@ -1,58 +1,130 @@
 import ReservationModel from "../models/reservation.model.js";
 import timeSlotModel from "../models/timeSlot.model.js";
-import crypto from 'crypto';
+import crypto from "crypto";
 
-const register = async (data)=>{
-    const result = await timeSlotModel.decrementCapacity(data.timeSlotId);
-    if(result.affectedRows === 0){
-        throw new Error('Créneau déjà complet');
-    }
+const register = async (data) => {
+  const result = await timeSlotModel.decrementCapacity(data.timeSlotId);
+  if (result.affectedRows === 0) {
+    throw new Error("Créneau déjà complet");
+  }
 
-     const qrToken = crypto.randomUUID();
+  const qrToken = crypto.randomUUID();
 
-    await ReservationModel.create({
-        ...data,
-        qrToken
-    });
+  await ReservationModel.create({
+    ...data,
+    qrToken,
+  });
 
   return { message: "Réservation confirmée", qrToken };
+};
 
-}
+const getByDateAndSousService = async (date, sousServiceId) => {
+  return await ReservationModel.findByDateAndSousService(date, sousServiceId);
+};
 
-const getByDateAndSousService  = async (date,sousServiceId)=>{
+const getByDateAndService = async (date, serviceId) => {
+  return await ReservationModel.findByDateAndService(date, serviceId);
+};
 
-    return await ReservationModel.findByDateAndSousService(date, sousServiceId);
-}
+const getByDateAndServiceGroupByTime = async (date, serviceId) => {
+  return await ReservationModel.findByDateAndServiceGroupByTime(
+    date,
+    serviceId,
+  );
+};
 
-const getByDateAndService  = async (date,serviceId)=>{
-
-    return await ReservationModel.findByDateAndService(date, serviceId);
-}
-
-const getByQrCode = async (qrCode)=>{
-    const result = await ReservationModel.findByQrToken(qrCode);
-    if(result.id){
-        const update = await ReservationModel.updateStatus(result.id,"Valide");
-        if(update.affectedRows === 0){
-        throw new Error('Réservation introuvable');
+const getByQrCode = async (qrCode) => {
+  const result = await ReservationModel.findByQrToken(qrCode);
+  if (result.id) {
+    const update = await ReservationModel.updateStatus(result.id, "Valide");
+    if (update.affectedRows === 0) {
+      throw new Error("Réservation introuvable");
     }
-    }
-    return result;
+  }
+  return result;
+};
+
+const setStatus = async (id, statut) => {
+  const result = await ReservationModel.updateStatus(id, statut);
+  if (result.affectedRows === 0) {
+    throw new Error("Réservation introuvable");
+  }
+
+  return { message: "Statut mise à jour avec succès" };
+};
+
+const getAllClientReservation = async (serviceId) => {
+  return await ReservationModel.findAllClientReservation(serviceId);
+};
+const getClientReservation = async (clientId) => {
+  return await ReservationModel.findClientReservation(clientId);
+};
+const getStatisticByServiceId = async (serviceId) => {
+  return await ReservationModel.findStatisticByServiceId(serviceId);
+};
+const getHourlyDataByServiceIdAndDate = async (serviceId, date) => {
+  const rows1 = await ReservationModel.findByDateAndServiceGroupByTime(
+    date,
+    serviceId,
+  );
+  const rows2 =
+    await ReservationModel.findTimeSlotCapacityByDateAndServiceGroupByTime(
+      serviceId,
+    );
+
+  const reservationsMap = new Map(
+    rows1.map((item) => [item.time, item.total_reservations]),
+  );
+
+  const rows = rows2.map((item2) => ({
+    hour: item2.time,
+    appointments: reservationsMap.get(item2.time) || 0,
+    capacity: Number(item2.capacity),
+  }));
+  return rows;
+};
+const getDayServiceDistributionByServiceIdAndDate = async (serviceId, date) => {
+  return await ReservationModel.findDayServiceDistributionByServiceIdAndDate(
+    serviceId,
+    date,
+  );
+};
+
+const getWeeklyDataByServiceIdAndDate = async (serviceId, date) => {
+  return await ReservationModel.findWeeklyDataByServiceIdAndDate(serviceId, date);
+}
+const getWeeklyServiceDistributionByServiceIdAndDate = async (serviceId, date) => {
+  return await ReservationModel.findWeeklyServiceDistributionByServiceIdAndDate(serviceId, date);
+}
+const getMonthlyByServiceIdAndDate = async (serviceId, date) => {
+  return await ReservationModel.findMonthlyByServiceIdAndDate(serviceId, date);
+}
+const getMonthlyServiceDistributionByServiceIdAndDate = async (serviceId, date) => {
+  return await ReservationModel.findMonthlyServiceDistributionByServiceIdAndDate(serviceId, date);
+}
+const getYearlyByServiceIdAndDate = async (serviceId, date) => {
+  return await ReservationModel.findYearlyByServiceIdAndDate(serviceId, date);
+}
+const getYearlyServiceDistributionByServiceIdAndDate = async (serviceId, date) => {
+  return await ReservationModel.findYearlyServiceDistributionByServiceIdAndDate(serviceId, date);
 }
 
-const setStatus = async (id, statut)=>{
-    const result = await ReservationModel.updateStatus(id,statut);
-    if(result.affectedRows === 0){
-        throw new Error('Réservation introuvable');
-    }
-
-    return {message: "Statut mise à jour avec succès"}
-}
-
-export default{
-    register,
-    getByDateAndSousService,
-    getByDateAndService,
-    getByQrCode,
-    setStatus
-}
+export default {
+  register,
+  getByDateAndSousService,
+  getByDateAndService,
+  getByQrCode,
+  setStatus,
+  getByDateAndServiceGroupByTime,
+  getAllClientReservation,
+  getClientReservation,
+  getStatisticByServiceId,
+  getHourlyDataByServiceIdAndDate,
+  getDayServiceDistributionByServiceIdAndDate,
+  getWeeklyDataByServiceIdAndDate,
+  getWeeklyServiceDistributionByServiceIdAndDate,
+  getMonthlyByServiceIdAndDate,
+  getMonthlyServiceDistributionByServiceIdAndDate,
+  getYearlyByServiceIdAndDate,
+  getYearlyServiceDistributionByServiceIdAndDate
+};

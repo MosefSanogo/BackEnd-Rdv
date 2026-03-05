@@ -21,8 +21,17 @@ const deleteCitoyen = async (id)=>{
     }
 }
 
+const getAllClientForService = async (serviceId)=>{
+    return await citoyenModel.getAllClientForService(serviceId);
+}
+const getCountClientForService = async (serviceId)=>{
+    return await citoyenModel.getCountClientForService(serviceId);
+}
+
 export default{
     register,
     getCitoyen,
-    deleteCitoyen
+    deleteCitoyen,
+    getAllClientForService,
+    getCountClientForService
 }

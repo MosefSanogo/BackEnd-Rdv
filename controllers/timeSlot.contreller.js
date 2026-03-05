@@ -14,6 +14,18 @@ const generate = async (req, res, next) => {
     next(error);
   }
 }
+const getTimeSlots = async (req, res, next) => {
+    try{
+        const { service_id, sous_service_id, date } = req.params;
+        const slots = await timeSlotService.getTimeSlots(service_id, sous_service_id, date);
+         res.status(200).json({
+            ...slots
+        });
+    } catch (error) {
+    next(error);
+  }
+}
 export default{
-    generate
+    generate,
+    getTimeSlots
 }

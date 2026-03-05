@@ -13,4 +13,10 @@ router.get('/get/citoyens',
 router.delete('/delete/:id',
     CitoyenController.deleteCitoyen
 )
+router.get('/getAllClientForService/:id',
+    CitoyenController.getAllClientForService
+)
+router.get('/getCountClientForService/:id',
+    CitoyenController.getCountClientForService
+)
 export default router;

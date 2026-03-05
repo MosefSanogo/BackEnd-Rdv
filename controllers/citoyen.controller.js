@@ -29,8 +29,30 @@ const deleteCitoyen = async (req,res,next)=>{
         next(error);
     }
 }
+const getAllClientForService = async (req,res,next)=>{
+    try{
+        const serviceId = req.params.id
+        const clients = await citoyenService.getAllClientForService(serviceId)
+        res.status(200).json(clients);
+    } catch (error) {
+        next(error);
+    }
+}
+
+const getCountClientForService = async (req,res,next)=>{
+    try{
+        const serviceId = req.params.id
+        const count = await citoyenService.getCountClientForService(serviceId)
+        res.status(200).json({count});
+    } catch (error) {
+        next(error);
+    }
+}
+
 export default{
     register,
     getCitoyen,
-    deleteCitoyen
+    deleteCitoyen,
+    getAllClientForService,
+    getCountClientForService
 }

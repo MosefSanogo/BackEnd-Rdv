@@ -8,4 +8,9 @@ router.post(
     timeSlotController.generate
 )
 
+router.get(
+    '/getTimeSlots/:service_id/:sous_service_id/:date',
+    timeSlotController.getTimeSlots
+)
+
 export default router;

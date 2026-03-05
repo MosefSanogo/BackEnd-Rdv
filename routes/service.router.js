@@ -29,7 +29,26 @@ router.post(
     '/updateSousServiceActif',
     serviceController.setSousServiceActif
 )
-
+router.get(
+    '/getSousServiceActif/:id',
+    serviceController.getSousServiceActif
+)
+router.get(
+    '/getCountSousServiceActif/:id',
+    serviceController.getCountSousServiceActif
+)
+router.get(
+    '/getSousServiceWithParams/:id',
+    serviceController.getSousServiceWithParams
+)
+router.post(
+    '/addSousService',
+    serviceController.addSousService
+)
+router.delete(
+    '/deleteSousService/:id',
+    serviceController.deleteSousService
+)
 
 
 

@@ -6,8 +6,9 @@ import serviceRoutes from '../routes/service.router.js';
 import path from 'path';
 import reservationRoutes from '../routes/reservation.router.js';
 import ferieRoutes from '../routes/feries.router.js';
-
+import cors from 'cors';
 const app = express();
+app.use(cors());
 app.use(express.json());
 app.use('/images', express.static(path.join(process.cwd(), 'public/images')));
 

@@ -50,6 +50,11 @@ router.delete(
     serviceController.deleteSousService
 )
 
+router.get(
+    '/findByServiceId/:id',
+    serviceController.findByServiceId
+)
+
 
 
 export default router;

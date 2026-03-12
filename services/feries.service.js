@@ -18,7 +18,13 @@ const register = async (data)=>{
     return {message: "Un problème est survenu"}
 }
 
+const deleteFerie = async (id)=>{
+    const result = await feriesModel.deleteFerie(id);
+    return result;
+}
+
 export default{
     getByServiceId,
-    register
+    register,
+    deleteFerie
 }

@@ -12,4 +12,8 @@ router.post(
     horaireTravailController.setActif
 )
 
+router.get(
+    '/findBySousServiceId/:id',
+    horaireTravailController.getBySousServiceId
+)
 export default router;

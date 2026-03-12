@@ -1,5 +1,5 @@
 import serviceModel from "../models/service.model.js";
-
+import bcrypt from 'bcrypt';
 const register = async (data, img) => {
   const exists = await serviceModel.findByNameCityAndAddress(
     data.nom,
@@ -10,7 +10,7 @@ const register = async (data, img) => {
   if (exists) {
     throw new Error("Ce service existe déjà dans cette ville");
   }
-
+  data.password = await bcrypt.hash(data.password, 10);
   const result = await serviceModel.create(data, img);
   return result;
 };
@@ -79,6 +79,25 @@ const deleteSousService = async (id) => {
 
 }
 
+const findByServiceId = async (serviceId) => {
+   let result = await serviceModel.findByServiceId(serviceId);
+   if (!result) {
+    throw new Error("Service introuvable");
+  }
+  result ={
+    id: result.id,
+    agencyName: result.nom,
+    address: result.adresse,
+    phone: result.tel,
+    email: result.email,
+    ville: result.ville_name,
+    img: result.image_url,
+    category: result.category,
+    welcomeMessage: result.description
+  }
+    return result;
+}
+
 export default {
   register,
   getAllService,
@@ -89,5 +108,6 @@ export default {
   getCountSousServiceActif,
   getSousServiceWithParams,
   addSousService,
-  deleteSousService
+  deleteSousService,
+  findByServiceId
 };

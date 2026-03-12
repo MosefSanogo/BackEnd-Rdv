@@ -18,7 +18,18 @@ const setActif = async(req,res,next)=>{
         next(error);
     }
 }
+const getBySousServiceId = async (req,res,next)=>{
+    try {
+        const sousServiceId = req.params.id;
+        const horaires = await horaireTravailService.getBySousServiceId(sousServiceId);
+        res.status(200).json(horaires);
+    } catch (error) {
+        next(error);
+    }
+}
+
 export default{
     register,
-    setActif
+    setActif,
+    getBySousServiceId
 }

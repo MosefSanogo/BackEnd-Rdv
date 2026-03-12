@@ -14,7 +14,7 @@ const findByServiceIdAndDate = async (date,serviceId)=>{
 
 const findByServiceId = async (serviceId)=>{
     const [row] = await database.execute(
-        `SELECT * FROM jours_feries j
+        `SELECT id,DATE_FORMAT(date, '%d/%m/%Y') as date, description as label, type FROM jours_feries j
         WHERE id_service = ?
         `,
         [serviceId]
@@ -24,21 +24,31 @@ const findByServiceId = async (serviceId)=>{
 }
 
 const create = async (data)=>{
-    const{id_service,date,description} = data
+    const{id_service,date,description,type} = data
     const [result] = await database.execute(
         `INSERT INTO jours_feries
-        (id_service, date, description)
-        VALUES(?,?,?)
+        (id_service, date, description,type)
+        VALUES(?,?,?,?)
         `,
-        [id_service,date,description]
+        [id_service,date,description,type]
     );
 
     return result;
+}
+
+const deleteFerie = async (id)=>{
+    const [result] = await database.execute(
+        `DELETE FROM jours_feries
+         WHERE id = ?`,
+         [id]
+    );
+    return {message: "Jour férié supprimé avec succès"};
 }
 
 
 export default{
     findByServiceIdAndDate,
     findByServiceId,
-    create
+    create,
+    deleteFerie
 }

@@ -13,4 +13,9 @@ router.get(
     feriesController.getByServiceId
 )
 
+router.delete(
+    '/delete/:id',
+    feriesController.deleteFerie
+)
+
 export default router;

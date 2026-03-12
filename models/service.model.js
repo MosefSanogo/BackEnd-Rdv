@@ -6,7 +6,10 @@ const create = async (data, image) => {
     ville_id,
     adresse,
     category,
-    sousServices
+    sousServices,
+    tel,
+    email,
+    password
   } = data;
 
   const connection = await database.getConnection();
@@ -17,9 +20,9 @@ const create = async (data, image) => {
     // 1️⃣ Création service
     const [serviceResult] = await connection.execute(
       `INSERT INTO services
-       (nom, description, ville_id, adresse, image_url, category)
-       VALUES (?, ?, ?, ?, ?, ?)`,
-      [nom, description, ville_id, adresse, image, category]
+       (nom, description, ville_id, adresse, image_url, category,tel,email,password)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [nom, description, ville_id, adresse, image, category, tel, email, password]
     );
 
     const serviceId = serviceResult.insertId;
@@ -72,7 +75,10 @@ const createSousService = async (data) => {
 
 const findByNameCityAndAddress  = async (nom,id,adresse)=>{
     const [result] = await database.execute(
-        'SELECT * FROM services WHERE nom = ? AND ville_id = ? AND adresse = ?',
+        `SELECT s.*, v.nom AS ville_name 
+        FROM services s 
+        INNER JOIN villes v ON s.ville_id = v.id 
+        WHERE nom = ? AND ville_id = ? AND adresse = ?`,
         [nom,id,adresse]
     );
 
@@ -81,12 +87,24 @@ const findByNameCityAndAddress  = async (nom,id,adresse)=>{
 
 const findAllService = async ()=>{
     const [row] = await database.execute(
-        `SELECT * FROM services 
-        WHERE actif = 1
-        `,
+        `SELECT s.*, v.nom AS ville_name 
+        FROM services s 
+        INNER JOIN villes v ON s.ville_id = v.id `,
     );
 
     return row;
+}
+
+const findByServiceId = async (serviceId)=>{
+    const [row] = await database.execute(
+        `SELECT s.*, v.nom as ville_name
+        FROM services s 
+        INNER JOIN villes v ON s.ville_id = v.id 
+        WHERE s.id = ?`,
+        [serviceId]
+    );
+
+    return row[0];
 }
 
 const findAllSousServiceFromServiceId = async (serviceId)=>{
@@ -226,5 +244,6 @@ export default{
     getCountSousServiceActif,
     getSousServiceWithParams,
     createSousService,
-    deleteSousService
+    deleteSousService,
+    findByServiceId,
 }

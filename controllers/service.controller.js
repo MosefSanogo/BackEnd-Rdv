@@ -130,6 +130,15 @@ const deleteSousService = async (req, res, next) => {
     next(error);
   }
 };
+const findByServiceId = async (req, res, next) => {
+    try {
+        const serviceId = req.params.id;
+        const rows = await serviceService.findByServiceId(serviceId);
+        res.status(200).json(rows);
+    } catch (error) {
+        next(error);
+    }
+  };
 export default {
   register,
   findAllService,
@@ -140,5 +149,6 @@ export default {
   getSousServiceActif,
   getSousServiceWithParams,
   addSousService,
-  deleteSousService
+  deleteSousService,
+  findByServiceId
 };

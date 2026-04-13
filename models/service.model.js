@@ -78,7 +78,7 @@ const findByNameCityAndAddress  = async (nom,id,adresse)=>{
         `SELECT s.*, v.nom AS ville_name 
         FROM services s 
         INNER JOIN villes v ON s.ville_id = v.id 
-        WHERE nom = ? AND ville_id = ? AND adresse = ?`,
+        WHERE s.nom = ? AND s.ville_id = ? AND s.adresse = ?`,
         [nom,id,adresse]
     );
 

@@ -9,6 +9,9 @@ const register = async (data)=>{
     if(ferie){
         throw new Error('Information déjà enregistrée')
     }
+    if(new Date(data.date) < new Date()){
+        throw new Error('La date doit être supérieure ou égale à la date actuelle')
+    }
     const result = await feriesModel.create(data);
 
     if(result.insertId){

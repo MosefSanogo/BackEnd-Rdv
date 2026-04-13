@@ -14,8 +14,7 @@ const findBySousServiceAndDay = async (sousServiceId, jourSemaine) => {
 const findBySousService = async (sousServiceId) => {
   const [rows] = await database.execute(
     `SELECT * FROM horaires_travail
-     WHERE sous_service_id = ?
-       AND actif = 1`,
+     WHERE sous_service_id = ?`,
     [sousServiceId],
   );
   return rows;
@@ -62,9 +61,59 @@ const create = async (data) => {
   }
 };
 
+const updateOne = async (id, fields) => {
+  const connection = await database.getConnection();
+
+  try {
+    // ✅ Construire dynamiquement le SET selon les champs reçus
+    const allowed = ["heure_debut", "heure_fin", "capacity_heure", "actif"];
+
+    // Mapper camelCase → snake_case
+    const fieldMap = {
+      startTime: "heure_debut",
+      endTime: "heure_fin",
+      capacity: "capacity_heure",
+      isActive: "actif",
+    };
+
+    const setClauses = [];
+    const values = [];
+
+    for (const [key, val] of Object.entries(fields)) {
+      const column = fieldMap[key];
+      if (!column) continue; // ignorer les champs inconnus
+      if (!allowed.includes(column)) continue; // sécurité whitelist
+      setClauses.push(`${column} = ?`);
+      values.push(val);
+    }
+
+    if (setClauses.length === 0) {
+      throw new Error("Aucun champ valide à mettre à jour");
+    }
+
+    values.push(id); // ✅ WHERE id = ?
+
+    const [result] = await connection.execute(
+      `UPDATE horaires_travail SET ${setClauses.join(", ")} WHERE id = ?`,
+      values,
+    );
+
+    if (result.affectedRows === 0) {
+      throw new Error(`Schedule id=${id} introuvable`);
+    }
+
+    return result;
+  } catch (err) {
+    console.log(err);
+  } finally {
+    connection.release();
+  }
+};
+
 export default {
   findBySousServiceAndDay,
   setActif,
   create,
   findBySousService,
+  updateOne,
 };

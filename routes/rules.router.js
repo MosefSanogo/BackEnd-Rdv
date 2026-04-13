@@ -7,7 +7,7 @@ router.post(
     rulesController.register
 );
 router.get(
-    '/findByServiceId/:id',
+    '/findByServiceId/:id', // Cache pendant 10 minutes
     rulesController.getByServiceId
 );
 export default router;

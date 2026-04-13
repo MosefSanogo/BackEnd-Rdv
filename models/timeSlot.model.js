@@ -33,6 +33,7 @@ const findByDateAndSousService = async (date, sousServiceId) => {
 };
 
 const bulkInsert = async (slots) => {
+  try{
   const values = slots.map((s) => [
     s.service_id,
     s.sous_service_id,
@@ -49,6 +50,9 @@ const bulkInsert = async (slots) => {
   `;
 
   await database.query(sql, [values]);
+  }catch (error) {
+    console.log(error)
+  }
 };
 
 const findByServiceAndSousServiceAndDate = async (
@@ -57,6 +61,7 @@ const findByServiceAndSousServiceAndDate = async (
   date,
 ) => {
   let rows;
+  let countRows;
   if (sousServiceId === 0 || sousServiceId === "0") {
     [rows] = await database.execute(
       `SELECT
@@ -70,6 +75,15 @@ const findByServiceAndSousServiceAndDate = async (
     ORDER BY time;`,
       [serviceId, date],
     );
+
+    [countRows] = await database.execute(
+    `SELECT COUNT(*) as total_creneaux,
+          SUM(capacity_restante > 0) as total_disponibles
+   FROM time_slots
+   WHERE service_id = ? AND date = ?`,
+    [serviceId, date],
+  );
+
   } else {
     [rows] = await database.execute(
       `SELECT
@@ -83,14 +97,16 @@ const findByServiceAndSousServiceAndDate = async (
     ORDER BY time;`,
       [serviceId, sousServiceId, date],
     );
-  }
-  const [countRows] = await database.execute(
+    
+    [countRows] = await database.execute(
     `SELECT COUNT(*) as total_creneaux,
           SUM(capacity_restante > 0) as total_disponibles
    FROM time_slots
    WHERE service_id = ? AND sous_service_id = ? AND date = ?`,
     [serviceId, sousServiceId, date],
   );
+  }
+  
   return { timeslots: rows, count: countRows[0] };
 };
 

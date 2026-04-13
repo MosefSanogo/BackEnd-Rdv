@@ -9,7 +9,7 @@ router.post(
 );
 
 router.get(
-    '/findByServiceId/:id',
+    '/findByServiceId/:id',  // Cache pendant 10 minutes
     feriesController.getByServiceId
 )
 

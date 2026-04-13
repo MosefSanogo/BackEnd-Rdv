@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-
+const SECRET = process.env.JWT_SECRET || "MALIDEFHSJBCSJKJBSNDNNQ @";
 const authMiddleware = (roles = []) => {
   return (req, res, next) => {
 
@@ -11,9 +11,9 @@ const authMiddleware = (roles = []) => {
     const token = authHeader.split(' ')[1];
 
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const decoded = jwt.verify(token, SECRET);
 
-      // Vérifier le rôle si spécifié
+   
       if (roles.length > 0 && !roles.includes(decoded.role)) {
         return res.status(403).json({ success: false, message: 'Accès refusé' });
       }

@@ -16,6 +16,7 @@ const findByServiceId = async (serviceId)=>{
     const [row] = await database.execute(
         `SELECT id,DATE_FORMAT(date, '%d/%m/%Y') as date, description as label, type FROM jours_feries j
         WHERE id_service = ?
+        order by date asc
         `,
         [serviceId]
     );

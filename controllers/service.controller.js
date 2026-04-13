@@ -2,9 +2,20 @@ import serviceService from "../services/service.service.js";
 
 const register = async (req, res, next) => {
   try {
+    console.log('Body reçu    :', req.body);
+    console.log('Fichier reçu :', req.file);
+
+    const ville_id = Number(req.body.ville_id);
+    if (isNaN(ville_id) || ville_id <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'ville_id invalide'
+      });
+    }
+
     const data = {
       ...req.body,
-      ville_id: Number(req.body.ville_id),
+      ville_id,
     };
 
     const result = await serviceService.register(

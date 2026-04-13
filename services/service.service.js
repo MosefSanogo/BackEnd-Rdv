@@ -1,18 +1,37 @@
 import serviceModel from "../models/service.model.js";
 import bcrypt from 'bcrypt';
+// --- serviceService.js ---
 const register = async (data, img) => {
-  const exists = await serviceModel.findByNameCityAndAddress(
-    data.nom,
-    data.ville_id,
-    data.adresse,
-  );
+  try {
+    console.log('=== SERVICE REGISTER ===');
+    
+    const exists = await serviceModel.findByNameCityAndAddress(
+      data.nom,
+      Number(data.ville_id),
+      data.adresse
+    );
+    console.log('Existe déjà ?', exists);
 
-  if (exists) {
-    throw new Error("Ce service existe déjà dans cette ville");
+    if (exists) {
+      throw new Error('Ce service existe déjà dans cette ville');
+    }
+
+    data.password = await bcrypt.hash(data.password, 10);
+    console.log('Password hashé ✅');
+
+    const result = await serviceModel.create(data, img);
+    console.log('Résultat création :', result);
+    
+    return result;
+
+  } catch (error) {
+    console.error('=== ERREUR SERVICE ===');
+    console.error('Message :', error.message);
+    console.error('Code SQL :', error.code);      // ER_DUP_ENTRY, ER_NO_REFERENCED_ROW_2...
+    console.error('SQL      :', error.sql);        // La requête qui a planté
+    console.error('SQLState :', error.sqlState);
+    throw error;
   }
-  data.password = await bcrypt.hash(data.password, 10);
-  const result = await serviceModel.create(data, img);
-  return result;
 };
 
 const getAllService = async () => {

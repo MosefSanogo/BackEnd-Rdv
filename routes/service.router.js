@@ -1,11 +1,15 @@
 import { Router } from "express";
 import upload from "../config/storage.js";
 import serviceController from "../controllers/service.controller.js";
+import rateLimitMiddleware from "../middlewares/rateLimit.middleware.js";
 
 const router = new Router();
 
 router.post(
     '/register',
+    rateLimitMiddleware.authLimiter,
+    rateLimitMiddleware.speedLimiter,
+    rateLimitMiddleware.generalLimiter,
     upload.single('image'),
     serviceController.register
 )

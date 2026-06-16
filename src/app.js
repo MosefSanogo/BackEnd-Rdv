@@ -1,5 +1,6 @@
 import express from 'express';
 import citoyenRoutes from '../routes/citoyen.router.js';
+import favorisRoutes from '../routes/favoris.route.js';
 import timeSloteRoutes from '../routes/timesSlot.router.js';
 import horaireTravailRoutes from '../routes/horaireTravail.router.js';
 import serviceRoutes from '../routes/service.router.js';
@@ -52,6 +53,9 @@ app.use('/api/pauses',pauses)
 
 //login
 app.use('/api/auth', loginRoutes);
+
+//Favoris
+app.use('/api/favoris', favorisRoutes);
 
 app.get('/api/me', authMiddleware(), (req, res) => {
     res.status(200).send({

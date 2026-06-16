@@ -4,7 +4,7 @@ const register = async (data)=>{
     const{telephone} = data
     const exists = await citoyenModel.findByTelephone(telephone)
     if(exists){
-        throw new Error("Téléphone déjà utilisé");
+        return exists;
     }
 
     return await citoyenModel.create(data);

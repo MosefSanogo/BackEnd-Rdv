@@ -2,10 +2,7 @@ import citoyenService from "../services/citoyen.service.js"
 const register = async (req, res, next) => {
   try {
     const citoyen = await citoyenService.register(req.body);
-    res.status(201).json({
-      message: "Citoyen inscrit avec succès",
-      data: citoyen
-    });
+    res.status(201).json(citoyen);
   } catch (error) {
     next(error);
   }

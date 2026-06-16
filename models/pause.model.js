@@ -14,23 +14,23 @@ const create = async (data)=>{
     return {id:row.insertId};
 }
 
-const findAllPausesBySousServiceId = async (serviceId) =>{
+const findAllPausesBySousServiceId = async (sousServiceId) =>{
     const [rows] = await database.execute(
         `SELECT p.id,p.heure_debut,p.heure_fin,p.sous_service_id, s.nom as sous_service_name 
         FROM pauses p
         INNER JOIN sous_service s on s.id = p.sous_service_id 
-        WHERE p.service_id = ?`,
-        [serviceId]
+        WHERE p.sous_service_id = ?`,
+        [sousServiceId]
     );
 
     return rows;
 }
 
-const deletePauseBySousServiceId = async (serviceId)=>{
+const deletePauseBySousServiceId = async (sousServiceId)=>{
     try {
     const [row] = await database.execute(
-        `DELETE FROM pauses WHERE id  = ?`,
-        [serviceId]
+        `DELETE FROM pauses WHERE sous_service_id  = ?`,
+        [sousServiceId]
     );
 
     return row;

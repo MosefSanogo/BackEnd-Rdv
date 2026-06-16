@@ -111,7 +111,7 @@ const findByServiceAndSousServiceAndDate = async (
 };
 
 const decrementCapacity = async (timeSlotId) => {
-  const [result] = await database.execute(
+    const [result] = await database.execute(
     `
     UPDATE time_slots
     SET capacity_restante = capacity_restante - 1

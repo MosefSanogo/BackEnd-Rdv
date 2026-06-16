@@ -11,17 +11,21 @@ const ReservationModel = {
       heure,
       qrToken,
     } = data;
-
-    const [result] = await database.execute(
-      `
+    try {
+      const [result] = await database.execute(
+        `
       INSERT INTO reservation
       (citoyen_id, service_id, sous_service_id, time_slot_id, date, heure, qr_token)
       VALUES (?, ?, ?, ?, ?, ?, ?)
       `,
-      [citoyenId, serviceId, sousServiceId, timeSlotId, date, heure, qrToken],
-    );
+        [citoyenId, serviceId, sousServiceId, timeSlotId, date, heure, qrToken],
+      );
 
-    return { id: result.insertId };
+      return { id: result.insertId };
+    } catch (error) {
+      console.error("Error creating reservation:", error);
+      throw error;
+    }
   },
 
   findByDateAndService: async (date, serviceId) => {
@@ -155,6 +159,27 @@ const ReservationModel = {
       FROM reservation r
       INNER JOIN sous_service s on s.id = r.sous_service_id
       WHERE r.citoyen_id = ?
+      `,
+      [clientId],
+    );
+    return rows;
+  },
+  findClientAllReservation: async (clientId) => {
+    const [rows] = await database.execute(
+      `
+      SELECT 
+        r.id AS id,
+        DATE_FORMAT(r.date, '%d/%m/%Y') AS date,
+        r.heure AS heure,
+        r.qr_token as code,
+        s.nom AS title,
+        r.statut AS statut,
+        CONCAT(s.adresse, ', ', v.nom) AS localisation, 
+        s.image_url AS image 
+      FROM reservation r
+      INNER JOIN service s ON s.id = r.service_id
+      INNER JOIN villes v ON v.id = s.ville_id
+      WHERE r.citoyen_id = ?;
       `,
       [clientId],
     );
@@ -425,12 +450,9 @@ const ReservationModel = {
       date,
     ]);
     return rows;
-  },  
+  },
 
-  findMonthlyByServiceIdAndDate: async (
-    serviceId,
-    date,
-  ) => {
+  findMonthlyByServiceIdAndDate: async (serviceId, date) => {
     const query = `
     WITH RECURSIVE weeks_of_month AS (
         SELECT 
@@ -477,10 +499,7 @@ const ReservationModel = {
     ]);
     return rows;
   },
-  findYearlyByServiceIdAndDate: async (
-    serviceId,
-    date,
-  ) => {
+  findYearlyByServiceIdAndDate: async (serviceId, date) => {
     const query = `
     WITH RECURSIVE months_of_year AS (
     SELECT 

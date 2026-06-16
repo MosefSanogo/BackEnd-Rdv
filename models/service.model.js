@@ -9,7 +9,7 @@ const create = async (data, image) => {
     sousServices,
     tel,
     email,
-    password
+    password,
   } = data;
 
   const connection = await database.getConnection();
@@ -22,7 +22,17 @@ const create = async (data, image) => {
       `INSERT INTO services
        (nom, description, ville_id, adresse, image_url, category,tel,email,password)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [nom, description, ville_id, adresse, image, category, tel, email, password]
+      [
+        nom,
+        description,
+        ville_id,
+        adresse,
+        image,
+        category,
+        tel,
+        email,
+        password,
+      ],
     );
 
     const serviceId = serviceResult.insertId;
@@ -32,14 +42,14 @@ const create = async (data, image) => {
       const [ssResult] = await connection.execute(
         `INSERT INTO sous_service (service_id, nom)
          VALUES (?, ?)`,
-        [serviceId, "Service Principal"]
+        [serviceId, "Service Principal"],
       );
 
       await connection.commit();
 
       return {
         service_id: serviceId,
-        sous_service_id: ssResult.insertId
+        sous_service_id: ssResult.insertId,
       };
     }
 
@@ -48,14 +58,13 @@ const create = async (data, image) => {
       await connection.execute(
         `INSERT INTO sous_service (service_id, nom)
          VALUES (?, ?)`,
-        [serviceId, ss.nom]
+        [serviceId, ss.nom],
       );
     }
 
     await connection.commit();
 
     return { service_id: serviceId };
-
   } catch (error) {
     await connection.rollback();
     throw error;
@@ -65,101 +74,125 @@ const create = async (data, image) => {
 };
 
 const createSousService = async (data) => {
-    const [result] = await database.query(
-        `INSERT INTO sous_service (service_id, nom)
+  const [result] = await database.query(
+    `INSERT INTO sous_service (service_id, nom)
          VALUES ? `,
-        [data]
-    );
-    return { message: "Sous service ajouté avec succès" };
-}
+    [data],
+  );
+  return { message: "Sous service ajouté avec succès" };
+};
 
-const findByNameCityAndAddress  = async (nom,id,adresse)=>{
-    const [result] = await database.execute(
-        `SELECT s.*, v.nom AS ville_name 
+const findByNameCityAndAddress = async (nom, id, adresse) => {
+  const [result] = await database.execute(
+    `SELECT s.*, v.nom AS ville_name 
         FROM services s 
         INNER JOIN villes v ON s.ville_id = v.id 
         WHERE s.nom = ? AND s.ville_id = ? AND s.adresse = ?`,
-        [nom,id,adresse]
-    );
+    [nom, id, adresse],
+  );
 
-    return result[0];
-}
+  return result[0];
+};
 
-const findAllService = async ()=>{
-    const [row] = await database.execute(
-        `SELECT s.*, v.nom AS ville_name 
-        FROM services s 
-        INNER JOIN villes v ON s.ville_id = v.id `,
-    );
+const findAllService = async () => {
+  const [rows] = await database.execute(
+    `SELECT 
+       s.id,
+       s.nom,
+       s.description,
+       s.ville_id,
+       s.adresse,
+       s.image_url,
+       s.category,
+       s.tel,
+       s.email,
+       s.actif,
+       s.created_at,
+       v.nom AS ville_name 
+     FROM services s 
+     INNER JOIN villes v ON s.ville_id = v.id`,
+  );
 
-    return row;
-}
+  return rows;
+};
 
-const findByServiceId = async (serviceId)=>{
-    const [row] = await database.execute(
-        `SELECT s.*, v.nom as ville_name
-        FROM services s 
-        INNER JOIN villes v ON s.ville_id = v.id 
-        WHERE s.id = ?`,
-        [serviceId]
-    );
+const findByServiceId = async (serviceId) => {
+  const [rows] = await database.execute(
+    `SELECT 
+       s.id,
+       s.nom,
+       s.description,
+       s.ville_id,
+       s.adresse,
+       s.image_url,
+       s.category,
+       s.tel,
+       s.email,
+       s.actif,
+       s.created_at,
+       v.nom AS ville_name 
+     FROM services s 
+     INNER JOIN villes v ON s.ville_id = v.id
+     WHERE s.id = ?`,
+    [serviceId],
+  );
 
-    return row[0];
-}
+  return rows[0];
+};
 
-const findAllSousServiceFromServiceId = async (serviceId)=>{
-    const [row] = await database.execute(
-        `SELECT * FROM sous_service 
+const findAllSousServiceFromServiceId = async (serviceId) => {
+  const [row] = await database.execute(
+    `SELECT * FROM sous_service 
         WHERE service_id = ? 
         AND actif = 1
         `,
-        [serviceId]
-    );
+    [serviceId],
+  );
 
-    return row;
-}
+  return row;
+};
 
-const setServiceActif = async (actif,serviceId)=>{
-    const [result] = await database.execute(
-        `UPDATE services 
+const setServiceActif = async (actif, serviceId) => {
+  const [result] = await database.execute(
+    `UPDATE services 
         SET actif = ?
         WHERE id = ?
         `,
-        [actif,serviceId]
-    );
+    [actif, serviceId],
+  );
 
-    return result
-}
+  return result;
+};
 
-const setSousServiceActif = async (actif,serviceId)=>{
-    const [result] = await database.execute(
-        `UPDATE sous_service
+const setSousServiceActif = async (actif, serviceId) => {
+  const [result] = await database.execute(
+    `UPDATE sous_service
         SET actif = ?
         WHERE id = ?
         `,
-        [actif,serviceId]
-    );
+    [actif, serviceId],
+  );
 
-    return result
-}
+  return result;
+};
 
-const getSousServiceActif = async (serviceId)=>{
-    const [result] = await database.execute(
-        `SELECT * FROM sous_service WHERE service_id = ? AND actif = 1`,
-        [serviceId]
-    );
+const getSousServiceActif = async (serviceId) => {
+  const [result] = await database.execute(
+    `SELECT * FROM sous_service WHERE service_id = ? AND actif = 1`,
+    [serviceId],
+  );
 
-    return result;
-}
+  return result;
+};
 
-const getCountSousServiceActif = async (serviceId)=>{
-    const [result] = await database.execute(
-        `SELECT COUNT(*) as count FROM sous_service WHERE service_id = ? AND actif = 1`,
-        [serviceId]
-    );
+const getCountSousServiceActif = async (serviceId) => {
+  const [result] = await database.execute(
+    `SELECT COUNT(*) as count FROM sous_service WHERE service_id = ? AND actif = 1`,
+    [serviceId],
+  );
 
-    return result[0];
-}
+  return result[0];
+};
 
 const getSousServiceWithParams = async (serviceId) => {
   const query = `SELECT
@@ -189,12 +222,10 @@ const getSousServiceWithParams = async (serviceId) => {
     INNER JOIN services s ON s.id = ss.service_id
     INNER JOIN villes v ON v.id = s.ville_id
     WHERE ss.service_id = ?`;
-    
-  
 
   const [rows] = await database.execute(query, [serviceId]);
 
-  return rows.map(row => ({
+  return rows.map((row) => ({
     id: String(row.id),
     name: row.name,
     localisation: row.localisation,
@@ -210,17 +241,17 @@ const deleteSousService = async (id) => {
 
   try {
     await connection.beginTransaction();
-   const [result] = await connection.execute(
+    const [result] = await connection.execute(
       `DELETE FROM sous_service WHERE id = ?`,
-      [id]
+      [id],
     );
     await connection.execute(
       `DELETE FROM horaires_travail WHERE sous_service_id = ?`,
-      [id]
+      [id],
     );
     await connection.execute(
       `DELETE FROM time_slots WHERE sous_service_id = ?`,
-      [id]
+      [id],
     );
     await connection.commit();
     return result;
@@ -232,18 +263,17 @@ const deleteSousService = async (id) => {
   }
 };
 
-
-export default{
-    create,
-    findByNameCityAndAddress,
-    findAllService,
-    findAllSousServiceFromServiceId,
-    setServiceActif,
-    setSousServiceActif,
-    getSousServiceActif,
-    getCountSousServiceActif,
-    getSousServiceWithParams,
-    createSousService,
-    deleteSousService,
-    findByServiceId,
-}
+export default {
+  create,
+  findByNameCityAndAddress,
+  findAllService,
+  findAllSousServiceFromServiceId,
+  setServiceActif,
+  setSousServiceActif,
+  getSousServiceActif,
+  getCountSousServiceActif,
+  getSousServiceWithParams,
+  createSousService,
+  deleteSousService,
+  findByServiceId,
+};

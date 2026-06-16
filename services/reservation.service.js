@@ -3,19 +3,49 @@ import timeSlotModel from "../models/timeSlot.model.js";
 import crypto from "crypto";
 
 const register = async (data) => {
-  const result = await timeSlotModel.decrementCapacity(data.timeSlotId);
-  if (result.affectedRows === 0) {
-    throw new Error("Créneau déjà complet");
+  let result;
+
+  try {
+    // 1. Diminuer la capacité
+    result = await timeSlotModel.decrementCapacity(data.timeSlotId);
+    if (result.affectedRows === 0) {
+      return {
+        message: "Créneau complet, veuillez choisir un autre créneau",
+        qrToken: null,
+        id: null,
+      };
+    }
+
+    const qrToken = crypto.randomUUID();
+
+    // 2. Créer la réservation
+    const { id } = await ReservationModel.create({
+      ...data,
+      qrToken,
+    });
+
+    if (!id) {
+      // 3. Restaurer si création mal retournée (rare)
+      await timeSlotModel.incrementCapacity(data.timeSlotId);
+      return {
+        message: "Erreur lors de la création de la réservation",
+        qrToken: null,
+        id: null,
+      };
+    }
+
+    return { message: "Réservation confirmée", qrToken, id };
+  } catch (error) {
+    // 4. Restaurer la capacité en cas d’erreur (SQL, etc.)
+    console.error("Error during reservation:", error);
+    await timeSlotModel.incrementCapacity(data.timeSlotId);
+
+    return {
+      message: "Erreur lors de l'enregistrement de la réservation",
+      qrToken: null,
+      id: null,
+    };
   }
-
-  const qrToken = crypto.randomUUID();
-
-  await ReservationModel.create({
-    ...data,
-    qrToken,
-  });
-
-  return { message: "Réservation confirmée", qrToken };
 };
 
 const getByDateAndSousService = async (date, sousServiceId) => {
@@ -56,9 +86,14 @@ const setStatus = async (id, statut) => {
 const getAllClientReservation = async (serviceId) => {
   return await ReservationModel.findAllClientReservation(serviceId);
 };
+
 const getClientReservation = async (clientId) => {
   return await ReservationModel.findClientReservation(clientId);
 };
+const getClientAllReservation = async (clientId) => {
+  return await ReservationModel.findClientAllReservation(clientId);
+};
+
 const getStatisticByServiceId = async (serviceId) => {
   return await ReservationModel.findStatisticByServiceId(serviceId);
 };
@@ -126,5 +161,6 @@ export default {
   getMonthlyByServiceIdAndDate,
   getMonthlyServiceDistributionByServiceIdAndDate,
   getYearlyByServiceIdAndDate,
-  getYearlyServiceDistributionByServiceIdAndDate
+  getYearlyServiceDistributionByServiceIdAndDate,
+  getClientAllReservation
 };

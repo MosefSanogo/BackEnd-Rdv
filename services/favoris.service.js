@@ -6,6 +6,9 @@ const register = async (data)=>{
 const getAllByCitoyenId = async (id) =>{
     return await favorisModel.findAllByCitoyenId(id);
 }
+const getAllWithService = async (id) =>{
+    return await favorisModel.findAllWithService(id);
+}
 const deleteById = async (serviceId,citoyenId)=>{
     return await favorisModel.deleteByServiceIdANDCitoyenId(citoyenId,serviceId);
 }
@@ -13,5 +16,6 @@ const deleteById = async (serviceId,citoyenId)=>{
 export default{
     register,
     getAllByCitoyenId,
-    deleteById
+    deleteById,
+    getAllWithService
 }

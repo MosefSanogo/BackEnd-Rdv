@@ -19,6 +19,16 @@ const getAllByCitoyenId = async (req, res, next) => {
   }
 };
 
+const getAllWithService = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const result = await favorisService.getAllWithService(id);
+    res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
 const deleteById = async (req, res, next) => {
   try {
     const { serviceId, citoyenId } = req.params;
@@ -34,5 +44,6 @@ const deleteById = async (req, res, next) => {
 export default{
     register,
     getAllByCitoyenId,
-    deleteById
+    deleteById,
+    getAllWithService
 }

@@ -16,17 +16,46 @@ const register = async (data) => {
   }
 };
 
-const findAllByCitoyenId = async (id) =>{
-    try {
-        const [rows] = await database.execute(
-            `SELECT * FROM favoris WHERE citoyen_id = ?`,
-            [id]
-        )
-        return rows
-    } catch (error) {
-        console.log(error);
-    }
-}
+const findAllByCitoyenId = async (id) => {
+  try {
+    const [rows] = await database.execute(
+      `SELECT * FROM favoris WHERE citoyen_id = ?`,
+      [id],
+    );
+    return rows;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const findAllWithService = async (id) => {
+  try {
+    const [rows] = await database.execute(
+      `SELECT
+              f.id as favorisId,
+              f.service_id,
+              f.citoyen_id,
+              s.id as id,
+              s.nom,
+              s.description,
+              s.ville_id,
+              s.adresse,
+              s.image_url,
+              s.category,
+              s.tel,
+              s.email,
+              s.actif,
+              s.created_at
+            FROM favoris f
+            JOIN services s on s.id = f.service_id
+            WHERE f.citoyen_id = ?`,
+      [id],
+    );
+    return rows;
+  } catch (error) {
+    console.log(error);
+  }
+};
 
 const deleteByServiceIdANDCitoyenId = async (citoyenId, serviceId) => {
   try {
@@ -37,12 +66,13 @@ const deleteByServiceIdANDCitoyenId = async (citoyenId, serviceId) => {
 
     return result;
   } catch (error) {
-    console.log(error)
+    console.log(error);
   }
 };
 
-export default{
-    register,
-    findAllByCitoyenId,
-    deleteByServiceIdANDCitoyenId
-}
+export default {
+  register,
+  findAllByCitoyenId,
+  deleteByServiceIdANDCitoyenId,
+  findAllWithService
+};

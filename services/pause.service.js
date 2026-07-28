@@ -9,6 +9,9 @@ const register = async (data) =>{
 const getAllPausesBySousServiceId = async (serviceId)=>{
     return await pauseModel.findAllPausesBySousServiceId(serviceId);
 }
+const getAllPausesByServiceId = async (serviceId)=>{
+    return await pauseModel.findAllPausesByServiceId(serviceId);
+}
 const deleteFromPauseBySousServiceId = async (serviceId)=>{
     return await pauseModel.deletePauseBySousServiceId(serviceId);
 }
@@ -16,5 +19,6 @@ const deleteFromPauseBySousServiceId = async (serviceId)=>{
 export default{
     register,
     getAllPausesBySousServiceId,
-    deleteFromPauseBySousServiceId
+    deleteFromPauseBySousServiceId,
+    getAllPausesByServiceId
 }

@@ -76,4 +76,8 @@ router.get(
     '/findYearlyServiceDistributionByServiceIdAndDate/:id/:date',
     reservationController.getYearlyServiceDistributionByServiceIdAndDate
 )
+router.delete(
+    '/deleteReservation/:id',
+    reservationController.deleteReservationById
+)
 export default router;

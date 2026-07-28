@@ -45,6 +45,13 @@ const create = async (data, image) => {
         [serviceId, "Service Principal"],
       );
 
+      const [rresult] = await connection.execute(
+            `INSERT INTO rules
+            (service_id, delay_min, delay_max, client_max, delay_cancel)
+            VALUES(?,?,?,?,?)`,
+            [serviceId, 1, 30, 1, 24]
+          );
+
       await connection.commit();
 
       return {
@@ -74,12 +81,16 @@ const create = async (data, image) => {
 };
 
 const createSousService = async (data) => {
+  try {
   const [result] = await database.query(
     `INSERT INTO sous_service (service_id, nom)
          VALUES ? `,
     [data],
   );
   return { message: "Sous service ajouté avec succès" };
+  } catch (error) {
+    throw error;
+  }
 };
 
 const findByNameCityAndAddress = async (nom, id, adresse) => {

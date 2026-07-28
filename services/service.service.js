@@ -10,17 +10,15 @@ const register = async (data, img) => {
       Number(data.ville_id),
       data.adresse
     );
-    console.log('Existe déjà ?', exists);
 
     if (exists) {
       throw new Error('Ce service existe déjà dans cette ville');
     }
 
     data.password = await bcrypt.hash(data.password, 10);
-    console.log('Password hashé ✅');
 
     const result = await serviceModel.create(data, img);
-    console.log('Résultat création :', result);
+
     
     return result;
 
@@ -74,16 +72,28 @@ const getCountSousServiceActif = async (serviceId) => {
 const getSousServiceWithParams = async (serviceId) => {
   return await serviceModel.getSousServiceWithParams(serviceId);
 };
-const addSousService = async (data, serviceId) => {
+
+export const addSousService = async (data, serviceId) => {
   if (!data) {
-    throw new Error("Le nom du sous service est obligatoire");
+    throw new Error("Les données de sous-service sont requises.");
   }
-  const dataWithoutDoublon = data.filter((item, index) => {
-    return data.findIndex((i) => i.nom === item.nom) === index;
+
+  // Si 'data' est un objet (ex: { '0': { nom: 'Reparation' } }), on le convertit en tableau
+  const dataArray = Array.isArray(data) ? data : Object.values(data);
+
+  if (dataArray.length === 0) {
+    throw new Error("La liste des sous-services ne peut pas être vide.");
+  }
+
+  // Filtrer les doublons
+  const dataWithoutDoublon = dataArray.filter((item, index) => {
+    return dataArray.findIndex((i) => i.nom === item.nom) === index;
   });
-  if (dataWithoutDoublon.length !== data.length) {
-    throw new Error("Il y a des doublons dans les noms des sous services");
+
+  if (dataWithoutDoublon.length !== dataArray.length) {
+    throw new Error("Il y a des doublons dans les noms des sous-services.");
   }
+
   const formattedData = dataWithoutDoublon.map((item) => [serviceId, item.nom]);
   return await serviceModel.createSousService(formattedData);
 };

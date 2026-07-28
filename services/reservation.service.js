@@ -1,11 +1,26 @@
 import ReservationModel from "../models/reservation.model.js";
+import rulesModel from "../models/rules.model.js";
 import timeSlotModel from "../models/timeSlot.model.js";
 import crypto from "crypto";
 
 const register = async (data) => {
   let result;
-
   try {
+    // 0. Vérifier si le client n'a pas atteint le nombre maximum de réservations pour ce service
+    const clientCount = await ReservationModel.countClientReservationsWithDateAndService(
+      data.citoyenId,
+      data.date,
+      data.serviceId,
+    );
+    const rules = await rulesModel.findByServiceId(data.serviceId);
+    console.log(rules);
+    if(clientCount >= rules?.client_max) {
+      return {
+        message: "Vous avez atteint le nombre maximum de réservations pour ce service",
+        qrToken: null,
+        id: null,
+      };
+    }
     // 1. Diminuer la capacité
     result = await timeSlotModel.decrementCapacity(data.timeSlotId);
     if (result.affectedRows === 0) {
@@ -46,6 +61,16 @@ const register = async (data) => {
       id: null,
     };
   }
+};
+
+const deleteReservationById = async (id) => {
+  const reservation = await ReservationModel.findById(id);
+  console.log(reservation.time_slot_id)
+  if (!reservation) {
+    throw new Error("Réservation introuvable");
+  }
+  await timeSlotModel.incrementCapacity(reservation.time_slot_id);
+  return await ReservationModel.deleteReservationById(id);
 };
 
 const getByDateAndSousService = async (date, sousServiceId) => {
@@ -162,5 +187,6 @@ export default {
   getMonthlyServiceDistributionByServiceIdAndDate,
   getYearlyByServiceIdAndDate,
   getYearlyServiceDistributionByServiceIdAndDate,
-  getClientAllReservation
+  getClientAllReservation,
+  deleteReservationById,
 };

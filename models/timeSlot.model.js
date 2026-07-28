@@ -125,17 +125,19 @@ const decrementCapacity = async (timeSlotId) => {
 };
 
 const incrementCapacity = async (timeSlotId) => {
+  try {
   const [result] = await database.execute(
     `
     UPDATE time_slots
     SET capacity_restante = capacity_restante + 1
     WHERE id = ?
-      AND capacity_restante > 0
     `,
     [timeSlotId],
   );
-
   return result;
+  } catch (error) {
+    
+  }
 };
 
 export default {

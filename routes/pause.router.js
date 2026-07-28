@@ -12,7 +12,10 @@ router.get(
     '/getAllPauses/:serviceId',
     pauseController.getAllPausesBySousServiceId
 )
-
+router.get(
+    '/getAllPausesByService/:serviceId',
+    pauseController.getAllPausesByServiceId
+)
 router.delete(
     '/deletePause/:serviceId',
     pauseController.deleteFromPauseBySousServiceId

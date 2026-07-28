@@ -27,7 +27,15 @@ const ReservationModel = {
       throw error;
     }
   },
-
+  findById: async (id) => {
+    const [rows] = await database.execute(
+      `
+      SELECT * FROM reservation WHERE id = ?
+      `,
+      [id],
+    );
+    return rows[0];
+  },
   findByDateAndService: async (date, serviceId) => {
     const [rows] = await database.execute(
       `
@@ -155,10 +163,13 @@ const ReservationModel = {
       DATE_FORMAT(r.date, '%d/%m/%Y') as date,
       r.heure as time,
       s.nom as service,
-      r.statut as status
+      r.statut as status,
+      s.adresse,
+      s.image_url
       FROM reservation r
-      INNER JOIN sous_service s on s.id = r.sous_service_id
+      INNER JOIN services s on s.id = r.service_id
       WHERE r.citoyen_id = ?
+      ORDER BY r.date DESC, r.heure DESC
       `,
       [clientId],
     );
@@ -185,6 +196,46 @@ const ReservationModel = {
     );
     return rows;
   },
+  countClientReservations: async (clientId) => {
+    const [rows] = await database.execute(
+      `
+      SELECT COUNT(*) AS totalReservations
+      FROM reservation
+      WHERE citoyen_id = ?;
+      `,
+      [clientId]
+    );
+    return rows[0].totalReservations;
+  },
+
+  countClientReservationsWithDateAndService: async (clientId, date, serviceId) => {
+    try {
+      const [rows] = await database.execute(
+      `
+      SELECT COUNT(*) AS totalReservations
+      FROM reservation
+      WHERE citoyen_id = ? AND date = ? AND service_id = ?;
+      `,
+      [clientId, date, serviceId]
+    );
+    return rows[0].totalReservations;
+    } catch (error) {
+      console.error("Error occurred while counting client reservations:", error);
+      throw error;
+    }
+  },
+
+  deleteReservationById: async (reservationId) => {
+    try {
+      const [rows] = await database.execute(`
+        DELETE FROM reservation WHERE id = ?`, [reservationId]);
+      return rows.affectedRows > 0;
+    } catch (error) {
+      console.error("Error occurred while deleting reservation:", error);
+      throw error;
+    }
+  },
+
   findStatisticByServiceId: async (serviceId) => {
     const query = `SELECT
 

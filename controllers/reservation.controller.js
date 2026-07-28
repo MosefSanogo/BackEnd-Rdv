@@ -163,7 +163,16 @@ const getYearlyServiceDistributionByServiceIdAndDate = async (req,res,next)=>{
     } catch (error) {
         next(error)
     }
-}  
+} 
+const deleteReservationById = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    await reservationService.deleteReservationById(id);
+    res.status(200).json({ message: "Réservation supprimée avec succès" });
+  } catch (error) {
+    next(error);
+  }
+} 
 export default {
   register,
   getByDateAndSousService,
@@ -181,5 +190,6 @@ export default {
   getMonthlyByServiceIdAndDate,
   getMonthlyServiceDistributionByServiceIdAndDate,
   getYearlyByServiceIdAndDate,
-  getYearlyServiceDistributionByServiceIdAndDate
+  getYearlyServiceDistributionByServiceIdAndDate,
+  deleteReservationById
 };

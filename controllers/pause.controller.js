@@ -18,6 +18,15 @@ const getAllPausesBySousServiceId = async (req,res,next)=>{
         next(error)
     }
 }
+const getAllPausesByServiceId = async (req,res,next)=>{
+    try {
+        const {serviceId} = req.params;
+        const rows = await pauseService.getAllPausesByServiceId(serviceId);
+        res.status(200).json(rows);
+    } catch (error) {
+        next(error)
+    }
+}
 
 const deleteFromPauseBySousServiceId = async (req,res,next)=>{
     try {
@@ -32,5 +41,6 @@ const deleteFromPauseBySousServiceId = async (req,res,next)=>{
 export default{
     register,
     getAllPausesBySousServiceId,
-    deleteFromPauseBySousServiceId
+    deleteFromPauseBySousServiceId,
+    getAllPausesByServiceId
 }

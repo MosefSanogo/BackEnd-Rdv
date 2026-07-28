@@ -26,6 +26,18 @@ const findAllPausesBySousServiceId = async (sousServiceId) =>{
     return rows;
 }
 
+const findAllPausesByServiceId = async (serviceId) =>{
+    const [rows] = await database.execute(
+        `SELECT p.id,p.heure_debut,p.heure_fin,p.sous_service_id, s.nom as sous_service_name 
+        FROM pauses p
+        INNER JOIN sous_service s on s.id = p.sous_service_id 
+        WHERE p.service_id = ?`,
+        [serviceId]
+    );
+
+    return rows;
+}
+
 const deletePauseBySousServiceId = async (sousServiceId)=>{
     try {
     const [row] = await database.execute(
@@ -43,5 +55,6 @@ const deletePauseBySousServiceId = async (sousServiceId)=>{
 export default{
     create,
     findAllPausesBySousServiceId,
-    deletePauseBySousServiceId
+    deletePauseBySousServiceId,
+    findAllPausesByServiceId
 }

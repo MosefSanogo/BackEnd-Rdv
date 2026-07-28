@@ -102,21 +102,10 @@ const getSousServiceWithParams = async (req, res, next) => {
 const addSousService = async (req, res, next) => {
   try {
     const { data, serviceId } = req.body;
-
+    console.log(req.body)
     const result = await serviceService.addSousService(data, serviceId);
     return res.status(201).json(result);
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message || "Erreur serveur",
-      error:
-        process.env.NODE_ENV === "development"
-          ? {
-              message: error.message,
-              stack: error.stack,
-            }
-          : undefined,
-    });
     next(error);
   }
 };

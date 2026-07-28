@@ -45,9 +45,11 @@ const findAllWithService = async (id) => {
               s.tel,
               s.email,
               s.actif,
-              s.created_at
+              s.created_at,
+              v.nom as ville_name
             FROM favoris f
             JOIN services s on s.id = f.service_id
+            JOIN villes v on v.id = s.ville_id
             WHERE f.citoyen_id = ?`,
       [id],
     );
